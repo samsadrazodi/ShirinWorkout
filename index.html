@@ -178,7 +178,7 @@
 
   <main class="wrap" id="content"></main>
 
-  <footer>برای هر حرکت می‌توانی گیف نمایش حرکت را اضافه کنی — روی کادر گیف بزن.</footer>
+  <footer>برای هر حرکت می‌توانی گیف یا فایل تصویری اضافه کنی — روی کادر بزن. آدرس مستقیم گیف استفاده کن (مثلاً از Google Drive با sharing link) یا فایل را انتخاب کن.</footer>
 
 <script>
 const fa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
@@ -319,7 +319,11 @@ function gifSlotHTML(k){
   const src = state[k]?.gif;
   if(src){
     return `<div class="gif-wrap">
-      <div class="gif-slot" data-k="${k}"><img src="${src}" alt="نمایش حرکت"></div>
+      <div class="gif-slot" data-k="${k}" data-load="${k}">
+        <img src="${src}" alt="نمایش حرکت" data-img="${k}" style="display:none">
+        <div class="play" style="display:none" data-play="${k}">${playSVG}</div>
+        <div class="hint" data-hint="${k}">درحال بارگذاری...</div>
+      </div>
       <div class="gif-tools show">
         <button class="mini-btn" data-act="change" data-k="${k}">تغییر گیف</button>
         <button class="mini-btn del" data-act="del" data-k="${k}">حذف</button>
@@ -465,6 +469,27 @@ function bind(){
   });
   document.querySelectorAll('[data-url]').forEach(inp=>{
     inp.onkeydown=e=>{ if(e.key==='Enter'){ document.querySelector(`[data-url-go="${inp.dataset.url}"]`)?.click(); } };
+  });
+  // image load handlers
+  document.querySelectorAll('[data-img]').forEach(img=>{
+    const k=img.dataset.img;
+    const slot=document.querySelector(`[data-load="${k}"]`);
+    const hint=document.querySelector(`[data-hint="${k}"]`);
+    const play=document.querySelector(`[data-play="${k}"]`);
+    img.onload=()=>{
+      img.style.display='block';
+      if(hint)hint.style.display='none';
+      if(play)play.style.display='none';
+    };
+    img.onerror=()=>{
+      img.style.display='none';
+      if(hint){
+        hint.textContent='نتوانستم تصویر را بارگذاری کنم — آدرس درست نیست یا مسدود است';
+        hint.style.display='block';
+      }
+      if(play)play.style.display='block';
+      if(slot)slot.style.cursor='pointer';
+    };
   });
 }
 
